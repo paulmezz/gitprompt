@@ -1,0 +1,43 @@
+#/etc/bashrc-gitprompt
+# Git in my promptz
+if [[ $- == *i* ]] ; then
+    c_cyan=`tput setaf 6`
+    c_red=`tput setaf 1`
+    c_green=`tput setaf 2`
+    c_sgr0=`tput sgr0`
+
+    parse_git_branch ()
+    {
+      if git rev-parse --git-dir >/dev/null 2>&1
+      then
+              gitver=$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')
+              #numfil=$(git status -s 2>/dev/null | wc -l)
+	      numfil=$(git status | grep "#	" | wc -l)
+      else
+              return 0
+      fi
+        echo -e $gitver:$numfil
+    }
+
+    branch_color ()
+    {
+            if git rev-parse --git-dir >/dev/null 2>&1
+            then
+                    color=""
+		    # This is much cooler but only works with git >= 1.7
+                    #if git diff --quiet 2>/dev/null >&2
+		    if git status | grep "nothing to commit" 2>&1 > /dev/null
+                    then
+                            color="${c_green}"
+                    else
+                            color=${c_red}
+                    fi
+            else
+                    return 0
+            fi
+            echo -ne $color
+    }
+
+    PS1='[\u@\h \[${c_red}\]\W\[${c_sgr0}\] [\[$(branch_color)\]$(parse_git_branch)\[${c_sgr0}\]]]# '
+fi
+
